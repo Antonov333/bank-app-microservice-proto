@@ -19,13 +19,13 @@ public class ExpenseOperation {
     /**
      * Банковский счет клиента
      */
-    @Column(name = "accountFrom")
+    @Column(name = "account_from")
     private long accountFrom;
 
     /**
      * Банковский счет контрагента
      */
-    @Column(name = "accountTo")
+    @Column(name = "account_to")
     private long accountTo;
 
     /**
