@@ -5,6 +5,9 @@ import lombok.Data;
 
 import java.time.ZonedDateTime;
 
+/**
+ * Сущность расходной операции
+ */
 @Data
 @Entity
 @Table(name = "operations")
@@ -20,7 +23,7 @@ public class ExpenseOperation {
     private long accountFrom;
 
     /**
-     * Банковский счет продавца
+     * Банковский счет контрагента
      */
     @Column(name = "accountTo")
     private long accountTo;
@@ -49,4 +52,6 @@ public class ExpenseOperation {
      */
     @Column(name = "operation_time")
     private ZonedDateTime dateTime;
+
+    private boolean limitExceeded;
 }

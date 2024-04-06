@@ -7,4 +7,5 @@ CREATE table operations (
                             sum FLOAT, /** Сумма операции */
                             currency CHAR(3), /** Код валюты (короткое название) */
                             category VARCHAR, /** Категория расходов */
-                            operation_time TIMESTAMP /** Дата и время операции */)
+                            operation_time TIMESTAMP /** Дата и время операции */,
+                            limit_exceeded boolean /** Флаг превышения лимита*/);

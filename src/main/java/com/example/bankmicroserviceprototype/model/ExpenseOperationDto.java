@@ -1,14 +1,15 @@
 package com.example.bankmicroserviceprototype.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.time.ZonedDateTime;
-import java.util.Currency;
 
 /**
  * DTO модели расходной операции
  */
 @Data
+@Schema(description = "DTO модели расходной операции")
 public class ExpenseOperationDto {
 
     /**
