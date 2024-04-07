@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface LimitRepository extends JpaRepository<ExpenseOperationLimit, Integer> {
+public interface LimitRepository extends JpaRepository<ExpenseOperationLimit, Long> {
     @Query(nativeQuery = true, value = "SELECT * FROM limits WHERE date_and_time < today")
     List<ExpenseOperationLimit> findLimitsEstablishedBeforeToday();
 }

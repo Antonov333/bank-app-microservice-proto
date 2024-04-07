@@ -1,11 +1,15 @@
 package com.example.bankmicroserviceprototype.service;
 
+import com.example.bankmicroserviceprototype.mapper.MyMapper;
 import com.example.bankmicroserviceprototype.model.ExpenseOperationLimit;
+import com.example.bankmicroserviceprototype.model.ExpenseOperationLimitDto;
 import com.example.bankmicroserviceprototype.repository.LimitRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.time.ZonedDateTime;
 
 @RequiredArgsConstructor
 @Service
@@ -27,13 +31,17 @@ public class LimitService {
 
         // Look up database. If empty then apply default limit $1000 total,
         // else look through limit database to consider actual limit
-        if (limitRepository.count() != 0) {
-
-            List<ExpenseOperationLimit> limitList = limitRepository.findLimitsEstablishedBeforeToday();
-
+        if (limitRepository.count() > 0) {
+            return limitRepository.findById(limitRepository.count()).orElse(getDefaultLimit());
         }
-
-
         return actualLimit;
+    }
+
+    public ResponseEntity<ExpenseOperationLimit> saveNewLimit(ExpenseOperationLimitDto expenseOperationLimitDto) {
+        ExpenseOperationLimit expenseOperationLimit = MyMapper.INSTANCE
+                .getLimitEntityFromDto(expenseOperationLimitDto);
+        expenseOperationLimit.setLimitSettingDateAndTime(ZonedDateTime.now());
+        expenseOperationLimit = limitRepository.save(expenseOperationLimit);
+        return new ResponseEntity<>(expenseOperationLimit, HttpStatus.CREATED);
     }
 }

@@ -12,7 +12,7 @@ public class ExpenseOperationLimit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(name = "total")
     private Float TotalExpensesLimit;
@@ -22,6 +22,7 @@ public class ExpenseOperationLimit {
 
     @Column(name = "services")
     private Float ServiceExpensesLimit;
+
     @Column(name = "date_and_time")
     private ZonedDateTime limitSettingDateAndTime;
 

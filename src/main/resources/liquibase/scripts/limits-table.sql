@@ -8,3 +8,13 @@ CREATE table limits(
                         services FLOAT,
                         date_and_time TIMESTAMP
 );
+
+-- changeset antonov:3
+DROP table limits;
+CREATE table limits(
+                        id BIGSERIAL PRIMARY KEY,
+                        total FLOAT,
+                        products FLOAT,
+                        services FLOAT,
+                        date_and_time TIMESTAMP
+);
