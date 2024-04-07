@@ -1,3 +1,5 @@
 databaseChangeLog:
   - include:
       file: liquibase/scripts/operations-table.sql
+  - include:
+      file: liquibase/scripts/limits-table.sql
