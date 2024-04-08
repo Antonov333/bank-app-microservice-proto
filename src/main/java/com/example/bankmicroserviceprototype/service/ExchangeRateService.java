@@ -19,13 +19,17 @@ public class ExchangeRateService {
     @Value("${my.id}")
     private String apiId;
 
-    public ResponseEntity<ExchangeRateDataDto> readFromOpenExchangeRates() {
+    public ExchangeRateDataDto getDtoFromOpenExchangeRates() {
         String url = "https://openexchangerates.org/api/latest.json?app_id="
                 + apiId;
         // Keep on mind it is possible to put particular currency codes like "&symbols=KZT,RUB"
         // to narrow response
         Mono<ExchangeRateDataDto> exchangeRateDataMono =
                 WebClient.create(url).get().retrieve().bodyToMono(ExchangeRateDataDto.class);
-        return new ResponseEntity<>(exchangeRateDataMono.share().block(), HttpStatus.OK);
+        return exchangeRateDataMono.share().block();
+    }
+
+    public ResponseEntity<ExchangeRateDataDto> readFromOpenExchangeRates() {
+        return new ResponseEntity<>(getDtoFromOpenExchangeRates(), HttpStatus.OK);
     }
 }

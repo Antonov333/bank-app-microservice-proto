@@ -1,6 +1,6 @@
 package com.example.bankmicroserviceprototype.service;
 
-import com.example.bankmicroserviceprototype.mapper.MyMapper;
+import com.example.bankmicroserviceprototype.mapper.ModelMapper;
 import com.example.bankmicroserviceprototype.model.ExpenseOperation;
 import com.example.bankmicroserviceprototype.model.ExpenseOperationDto;
 import com.example.bankmicroserviceprototype.repository.ExpenseOperationRepository;
@@ -18,7 +18,7 @@ public class ExpenseOperationService {
     private final Logger logger = LoggerFactory.getLogger("ExpenseOperationService Logger");
     public ResponseEntity<HttpStatus> saveOp(ExpenseOperationDto expenseOperationDto) {
         logger.info("Received Expense Op Dto: " + expenseOperationDto);
-        ExpenseOperation expenseOperation = MyMapper.INSTANCE.toEntity(expenseOperationDto);
+        ExpenseOperation expenseOperation = ModelMapper.INSTANCE.toEntity(expenseOperationDto);
         logger.info("Converted to entity: " + expenseOperation);
         expenseOperation = expenseOperationRepository.save(expenseOperation);
         logger.info("Stored in database: " + expenseOperation);

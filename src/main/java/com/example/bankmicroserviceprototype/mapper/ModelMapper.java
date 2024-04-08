@@ -11,9 +11,9 @@ import org.mapstruct.factory.Mappers;
  * Мапперы для преобразования DTO в сущность, сущность в DTO и т.п.
  */
 @Mapper
-public interface MyMapper {
+public interface ModelMapper {
 
-    MyMapper INSTANCE = Mappers.getMapper(MyMapper.class);
+    ModelMapper INSTANCE = Mappers.getMapper(ModelMapper.class);
 
     /**
      * Маппер для получения сущности расходной операции на основе значений полей DTO

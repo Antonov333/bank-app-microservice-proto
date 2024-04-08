@@ -1,6 +1,6 @@
 package com.example.bankmicroserviceprototype.service;
 
-import com.example.bankmicroserviceprototype.mapper.MyMapper;
+import com.example.bankmicroserviceprototype.mapper.ModelMapper;
 import com.example.bankmicroserviceprototype.model.ExpenseOperationLimit;
 import com.example.bankmicroserviceprototype.model.ExpenseOperationLimitDto;
 import com.example.bankmicroserviceprototype.repository.LimitRepository;
@@ -38,7 +38,7 @@ public class LimitService {
     }
 
     public ResponseEntity<ExpenseOperationLimit> saveNewLimit(ExpenseOperationLimitDto expenseOperationLimitDto) {
-        ExpenseOperationLimit expenseOperationLimit = MyMapper.INSTANCE
+        ExpenseOperationLimit expenseOperationLimit = ModelMapper.INSTANCE
                 .getLimitEntityFromDto(expenseOperationLimitDto);
         expenseOperationLimit.setLimitSettingDateAndTime(ZonedDateTime.now());
         expenseOperationLimit = limitRepository.save(expenseOperationLimit);
