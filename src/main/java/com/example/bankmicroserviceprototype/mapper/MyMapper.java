@@ -23,6 +23,6 @@ public interface MyMapper {
      */
     ExpenseOperation toEntity(ExpenseOperationDto expenseOperationDto);
 
-    public ExpenseOperationLimit getLimitEntityFromDto(ExpenseOperationLimitDto expenseOperationLimitDto);
+    ExpenseOperationLimit getLimitEntityFromDto(ExpenseOperationLimitDto expenseOperationLimitDto);
 
 }

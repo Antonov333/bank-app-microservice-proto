@@ -15,13 +15,13 @@ public class ExpenseOperationLimit {
     private Long id;
 
     @Column(name = "total")
-    private Float TotalExpensesLimit;
+    private Float totalExpensesLimit;
 
     @Column(name = "products")
-    private Float ProductsExpensesLimit;
+    private Float productsExpensesLimit;
 
     @Column(name = "services")
-    private Float ServiceExpensesLimit;
+    private Float serviceExpensesLimit;
 
     @Column(name = "date_and_time")
     private ZonedDateTime limitSettingDateAndTime;
