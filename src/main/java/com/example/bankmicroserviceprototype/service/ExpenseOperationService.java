@@ -51,7 +51,7 @@ public class ExpenseOperationService {
                     beginningOfThisMonth);
             // Считаем сумму
             for (ExpenseOperation o : operationsThisMonth) {
-                sumThisMonth = +o.getSum();
+                sumThisMonth += o.getSum();
             }
 
             // сравниваем сумму с лимитом и устанавливаем значение флага
@@ -67,7 +67,7 @@ public class ExpenseOperationService {
                     beginningOfThisMonth);
             // Считаем сумму
             for (ExpenseOperation o : operationsThisMonth) {
-                sumThisMonth = +o.getSum();
+                sumThisMonth += o.getSum();
             }
 
             // сравниваем сумму с лимитом
