@@ -45,14 +45,14 @@ public class ExpenseOperationService {
         if (limitsDefinedForAllCategories(expenseOperation.getAccountFrom())) {
             // заданы лимиты по категориям расходов, поэтому ищем операции соответствующей категории,
             // совершенные с начала месяца
-            operationsThisMonth = expenseOperationRepository.findByAccountFromAndExpenseCategoryAndDateTimeAfter(
+            operationsThisMonth = expenseOperationRepository
+                    .findByAccountFromAndExpenseCategoryAndDateTimeAfter(
                     expenseOperation.getAccountFrom(),
                     expenseOperation.getExpenseCategory(),
                     beginningOfThisMonth);
+
             // Считаем сумму
-            for (ExpenseOperation o : operationsThisMonth) {
-                sumThisMonth += o.getSum();
-            }
+            sumThisMonth = calculateTotalSumOfOperations(operationsThisMonth);
 
             // сравниваем сумму с лимитом и устанавливаем значение флага
             expenseOperation.setLimitExceeded(
@@ -66,9 +66,9 @@ public class ExpenseOperationService {
                     expenseOperation.getAccountFrom(),
                     beginningOfThisMonth);
             // Считаем сумму
-            for (ExpenseOperation o : operationsThisMonth) {
-                sumThisMonth += o.getSum();
-            }
+
+            sumThisMonth = calculateTotalSumOfOperations(operationsThisMonth);
+
 
             // сравниваем сумму с лимитом
             expenseOperation.setLimitExceeded(
@@ -76,10 +76,19 @@ public class ExpenseOperationService {
                             limitService.getActualLimit().getTotalExpensesLimit());
         }
 
+        // сохраняем сущность расходной операции с вычисленным значением флага превышения лимита
         expenseOperation = expenseOperationRepository.save(expenseOperation);
         logger.info("Stored in database: " + expenseOperation);
         return new ResponseEntity<>(HttpStatus.OK);
 
+    }
+
+    Float calculateTotalSumOfOperations(List<ExpenseOperation> operationList) {
+        float sum = 0.0f;
+        for (ExpenseOperation o : operationList) {
+            sum += o.getSum();
+        }
+        return sum;
     }
 
     boolean limitsDefinedForAllCategories(Long accountFrom) {
@@ -89,4 +98,6 @@ public class ExpenseOperationService {
                         (limitService.getActualLimit().getServiceExpensesLimit() != null)
                 ;
     }
+
+    //TODO: implement accountFrom using for limits
 }
