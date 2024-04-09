@@ -109,6 +109,9 @@ public class ExpenseOperationService {
             sum += o.getSum();
         }
         return sum;
+
+        //TODO: complete logic!!
+
     }
 
     boolean limitsDefinedForAllCategories(Long accountFrom) {
