@@ -50,9 +50,7 @@ public class ExchangeRateService {
         Set<String> availableCurrencies = exchangeRateDataDto.getRates().keySet();
         String baseCurrency = exchangeRateDataDto.getBase();
         ZonedDateTime dateAndTime = ZonedDateTime.now();
-        availableCurrencies.forEach((a) -> {
-            saveRate(dateAndTime, a, ratesMap.get(a), baseCurrency);
-        });
+        availableCurrencies.forEach((a) -> saveRate(dateAndTime, a, ratesMap.get(a), baseCurrency));
 
     }
 
