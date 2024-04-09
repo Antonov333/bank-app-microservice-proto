@@ -26,4 +26,7 @@ public class ExpenseOperationLimit {
     @Column(name = "date_and_time")
     private ZonedDateTime limitSettingDateAndTime;
 
+    @Column(name = "account_from")
+    private Long accountFrom;
+
 }

@@ -11,4 +11,6 @@ import java.util.List;
 public interface LimitRepository extends JpaRepository<ExpenseOperationLimit, Long> {
     @Query(nativeQuery = true, value = "SELECT * FROM limits WHERE date_and_time < today")
     List<ExpenseOperationLimit> findLimitsEstablishedBeforeToday();
+
+    List<ExpenseOperationLimit> findByAccountFrom(Long accountFrom);
 }

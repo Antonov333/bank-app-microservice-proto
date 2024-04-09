@@ -18,3 +18,6 @@ CREATE table limits(
                         services FLOAT,
                         date_and_time TIMESTAMP
 );
+
+-- changeset antonov:7
+ALTER table limits ADD account_from int8;

@@ -21,6 +21,6 @@ public class IntegrationController {
     @PostMapping()
     @Operation(summary = "Эндпойнт для получения данных расходной операции")
     public ResponseEntity<HttpStatus> loadExpenseOperation(@RequestBody ExpenseOperationDto expenseOperationDto) {
-        return expenseOperationService.saveOp(expenseOperationDto);
+        return expenseOperationService.saveExpenseOperation(expenseOperationDto);
     }
 }

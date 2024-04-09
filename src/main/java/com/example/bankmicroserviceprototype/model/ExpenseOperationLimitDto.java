@@ -15,4 +15,5 @@ public class ExpenseOperationLimitDto {
 
     @Schema(description = "Лимит расходов на услуги")
     private Float ServiceExpensesLimit;
+
 }

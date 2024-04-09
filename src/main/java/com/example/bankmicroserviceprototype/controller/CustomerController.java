@@ -24,19 +24,21 @@ public class CustomerController {
 
     @Operation(summary = "Эндпойнт для установки месячного лимита расходных операций",
             description = "По условиям ТЗ валюта лимита USD, дата устанавливается равной текущей, поэтому в эндпойнт мы принимаем только значения лимитов по категориям")
-    @PostMapping("/limit")
+    @PostMapping("/limit/{accountFrom}")
     @ApiResponses(value = {@ApiResponse(responseCode = "503", description = "Service is unavailable until construction completed"),
             @ApiResponse(responseCode = "201", description = "New expense operation limit stored in database")})
-    public ResponseEntity<ExpenseOperationLimit> setNewLimit(@io.swagger.v3.oas.annotations.parameters.RequestBody(
+    public ResponseEntity<ExpenseOperationLimit> setNewLimit(
+            @PathVariable(name = "accountFrom") Long accountFrom,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "В метод эндпойнта необходимо передать DTO месячного лимита расходных операций",
             content = @Content(schema = @Schema(implementation = ExpenseOperationLimitDto.class))) @RequestBody ExpenseOperationLimitDto expenseLimitDto) {
-        return limitService.saveNewLimit(expenseLimitDto);
+        return limitService.saveNewLimit(accountFrom, expenseLimitDto);
     }
 
-    @GetMapping("/limit")
+    @GetMapping("/limit/{accountFrom}")
     @Operation(summary = "Передача клиенту значения текущего лимита")
-    public ResponseEntity<ExpenseOperationLimit> getActualLimit() {
-        return new ResponseEntity<>(limitService.getActualLimit(), HttpStatus.OK);
+    public ResponseEntity<ExpenseOperationLimit> getActualLimit(@PathVariable(name = "accountFrom") Long accountFrom) {
+        return new ResponseEntity<>(limitService.getActualLimit(accountFrom), HttpStatus.OK);
     }
 
 

@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
+import java.util.Comparator;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -34,33 +36,41 @@ public class LimitService {
      * @return действующий лимит суммы расходных операций
      */
 
-    public ExpenseOperationLimit getActualLimit() {
+    public ExpenseOperationLimit getActualLimit(long accountFrom) {
         ExpenseOperationLimit actualLimit = getDefaultLimit();
+        actualLimit.setAccountFrom(accountFrom);
 
         // Look up database. If empty then apply default limit $1000 total,
         // else look through limit database and apply latest
-        if (limitRepository.count() > 0) {
-            return limitRepository.findById(limitRepository.count()).orElse(getDefaultLimit());
+        if (!limitRepository.findByAccountFrom(accountFrom).isEmpty()) {
+            List<ExpenseOperationLimit> limitList = limitRepository.findByAccountFrom(accountFrom)
+                    .stream().sorted(Comparator.comparing(ExpenseOperationLimit::getLimitSettingDateAndTime))
+                    .toList();
+            actualLimit = limitList.get(limitList.size() - 1);
+
         }
         return actualLimit;
     }
 
-    Float getActualLimitByCategory(ExpenseCategory expenseCategory) {
+    Float getActualLimitByCategory(long accountFrom, ExpenseCategory expenseCategory) {
         if (ExpenseCategory.SERVICE.equals(expenseCategory)) {
-            return getActualLimit().getServiceExpensesLimit();
+            return getActualLimit(accountFrom).getServiceExpensesLimit();
         }
         if (ExpenseCategory.PRODUCT.equals(expenseCategory)) {
-            return getActualLimit().getProductsExpensesLimit();
+            return getActualLimit(accountFrom).getProductsExpensesLimit();
         }
-        return getActualLimit().getTotalExpensesLimit();
+        return getActualLimit(accountFrom).getTotalExpensesLimit();
     }
 
-    public ResponseEntity<ExpenseOperationLimit> saveNewLimit(ExpenseOperationLimitDto expenseOperationLimitDto) {
+    public ResponseEntity<ExpenseOperationLimit> saveNewLimit(
+            Long accountFrom,
+            ExpenseOperationLimitDto expenseOperationLimitDto) {
 
         ExpenseOperationLimit expenseOperationLimit = ModelMapper.INSTANCE
                 .getLimitEntityFromDto(expenseOperationLimitDto);
 
         expenseOperationLimit.setLimitSettingDateAndTime(ZonedDateTime.now());
+        expenseOperationLimit.setAccountFrom(accountFrom);
 
         expenseOperationLimit = limitRepository.save(expenseOperationLimit);
 
