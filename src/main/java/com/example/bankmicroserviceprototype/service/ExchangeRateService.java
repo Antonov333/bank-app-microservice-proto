@@ -13,6 +13,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -64,7 +65,13 @@ public class ExchangeRateService {
         exchangeRateRepository.save(newExchangeRate);
     }
 
-    public ResponseEntity<ExchangeRateDataDto> readFromOpenExchangeRates() {
-        return new ResponseEntity<>(getDtoFromOpenExchangeRates(), HttpStatus.OK);
+    public ResponseEntity<ExchangeRateDataDto> getCurrencyRatesFromOpenExchangeRates() {
+        ExchangeRateDataDto exchangeRateDataDto = getDtoFromOpenExchangeRates();
+        saveExchangeRates(exchangeRateDataDto);
+        return new ResponseEntity<>(exchangeRateDataDto, HttpStatus.OK);
+    }
+
+    public List<ExchangeRate> getCurrencyRatesFromDataBase(String currencyCode) {
+        return exchangeRateRepository.findByCurrencyCode(currencyCode);
     }
 }

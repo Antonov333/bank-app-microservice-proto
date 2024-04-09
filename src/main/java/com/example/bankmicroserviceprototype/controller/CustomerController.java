@@ -22,7 +22,7 @@ public class CustomerController {
 
     final private LimitService limitService;
 
-    @Operation(summary = "Эндпойнт для установки месяного лимита расходных операций",
+    @Operation(summary = "Эндпойнт для установки месячного лимита расходных операций",
             description = "По условиям ТЗ валюта лимита USD, дата устанавливается равной текущей, поэтому в эндпойнт мы принимаем только значения лимитов по категориям")
     @PostMapping("/limit")
     @ApiResponses(value = {@ApiResponse(responseCode = "503", description = "Service is unavailable until construction completed"),

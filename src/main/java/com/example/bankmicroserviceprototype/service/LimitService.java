@@ -1,6 +1,7 @@
 package com.example.bankmicroserviceprototype.service;
 
 import com.example.bankmicroserviceprototype.mapper.ModelMapper;
+import com.example.bankmicroserviceprototype.model.ExpenseCategory;
 import com.example.bankmicroserviceprototype.model.ExpenseOperationLimit;
 import com.example.bankmicroserviceprototype.model.ExpenseOperationLimitDto;
 import com.example.bankmicroserviceprototype.repository.LimitRepository;
@@ -26,22 +27,43 @@ public class LimitService {
         return "USD";
     }
 
+    /**
+     * Метод проверяет наличие лимитов в базе данных и при отсутствии записей в таблице лимитов возвращает лимит по умолчанию.
+     * При наличии записей возвращается последний установленный лимит.
+     *
+     * @return действующий лимит суммы расходных операций
+     */
+
     public ExpenseOperationLimit getActualLimit() {
         ExpenseOperationLimit actualLimit = getDefaultLimit();
 
         // Look up database. If empty then apply default limit $1000 total,
-        // else look through limit database to consider actual limit
+        // else look through limit database and apply latest
         if (limitRepository.count() > 0) {
             return limitRepository.findById(limitRepository.count()).orElse(getDefaultLimit());
         }
         return actualLimit;
     }
 
+    Float getActualLimitByCategory(ExpenseCategory expenseCategory) {
+        if (ExpenseCategory.SERVICE.equals(expenseCategory)) {
+            return getActualLimit().getServiceExpensesLimit();
+        }
+        if (ExpenseCategory.PRODUCT.equals(expenseCategory)) {
+            return getActualLimit().getProductsExpensesLimit();
+        }
+        return getActualLimit().getTotalExpensesLimit();
+    }
+
     public ResponseEntity<ExpenseOperationLimit> saveNewLimit(ExpenseOperationLimitDto expenseOperationLimitDto) {
+
         ExpenseOperationLimit expenseOperationLimit = ModelMapper.INSTANCE
                 .getLimitEntityFromDto(expenseOperationLimitDto);
+
         expenseOperationLimit.setLimitSettingDateAndTime(ZonedDateTime.now());
+
         expenseOperationLimit = limitRepository.save(expenseOperationLimit);
+
         return new ResponseEntity<>(expenseOperationLimit, HttpStatus.CREATED);
     }
 }
