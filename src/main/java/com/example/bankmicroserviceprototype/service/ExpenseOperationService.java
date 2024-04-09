@@ -22,23 +22,27 @@ public class ExpenseOperationService {
 
     private final LimitService limitService;
 
+    private final ExchangeRateService exchangeRateService;
+
     private final Logger logger = LoggerFactory.getLogger("ExpenseOperationService Logger");
 
+
     public ResponseEntity<HttpStatus> saveExpenseOperation(ExpenseOperationDto expenseOperationDto) {
+
         logger.info("Received Expense Op Dto: " + expenseOperationDto);
+
         ExpenseOperation expenseOperation = ModelMapper.INSTANCE.toEntity(expenseOperationDto);
         logger.info("Converted to entity: " + expenseOperation);
 
         // Сохраняем операцию в базе данных
-
         expenseOperation = expenseOperationRepository.save(expenseOperation);
+
+        /* Определяем, превышен ли лимит расходов */
+
 
         float sumThisMonth;
         ZonedDateTime operationDateTime = expenseOperation.getDateTime();
-
-        ZonedDateTime beginningOfThisMonth = ZonedDateTime.of(operationDateTime.getYear(),
-                operationDateTime.getMonthValue(),
-                operationDateTime.getDayOfMonth(), 0, 0, 0, 0, operationDateTime.getZone());
+        ZonedDateTime beginningOfThisMonth = beginningOfMonth(operationDateTime);
 
         List<ExpenseOperation> operationsThisMonth;
 
@@ -53,7 +57,7 @@ public class ExpenseOperationService {
                     beginningOfThisMonth);
 
             // Считаем сумму
-            sumThisMonth = calculateTotalSumOfOperations(operationsThisMonth);
+            sumThisMonth = estimateTotalSumOfOperationsInUsd(operationsThisMonth);
 
             // сравниваем сумму с лимитом и устанавливаем значение флага
             expenseOperation.setLimitExceeded(
@@ -70,7 +74,7 @@ public class ExpenseOperationService {
                     beginningOfThisMonth);
             // Считаем сумму
 
-            sumThisMonth = calculateTotalSumOfOperations(operationsThisMonth);
+            sumThisMonth = estimateTotalSumOfOperationsInUsd(operationsThisMonth);
 
 
             // сравниваем сумму с лимитом
@@ -86,9 +90,22 @@ public class ExpenseOperationService {
 
     }
 
-    float calculateTotalSumOfOperations(List<ExpenseOperation> operationList) {
+    /**
+     * @param dateTime some date and time
+     * @return date and of 00:00:00 the first day of month specified by argument
+     */
+    ZonedDateTime beginningOfMonth(ZonedDateTime dateTime) {
+        return ZonedDateTime.of(dateTime.getYear(),
+                dateTime.getMonthValue(),
+                dateTime.getDayOfMonth(), 0, 0, 0, 0, dateTime.getZone());
+    }
+
+    float estimateTotalSumOfOperationsInUsd(List<ExpenseOperation> operationList) {
         float sum = 0.0f;
+        float exchangeRate;
         for (ExpenseOperation o : operationList) {
+            exchangeRate = exchangeRateService.retrieveExchangeRate(o.getCurrencyCode(),
+                    o.getDateTime());
             sum += o.getSum();
         }
         return sum;
@@ -100,5 +117,12 @@ public class ExpenseOperationService {
                         &
                         (limitService.getActualLimit(accountFrom).getServiceExpensesLimit() != null)
                 ;
+    }
+
+    public ResponseEntity<List<ExpenseOperation>> thisMonthExceeded(long accountFrom) {
+        List<ExpenseOperation> operationList = expenseOperationRepository
+                .findByAccountFromAndDateTimeAfterAndLimitExceeded(accountFrom,
+                        beginningOfMonth(ZonedDateTime.now()), true);
+        return new ResponseEntity<>(operationList, HttpStatus.OK);
     }
 }

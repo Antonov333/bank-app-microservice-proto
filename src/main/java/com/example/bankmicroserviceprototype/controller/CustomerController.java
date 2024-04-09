@@ -1,7 +1,9 @@
 package com.example.bankmicroserviceprototype.controller;
 
+import com.example.bankmicroserviceprototype.model.ExpenseOperation;
 import com.example.bankmicroserviceprototype.model.ExpenseOperationLimit;
 import com.example.bankmicroserviceprototype.model.ExpenseOperationLimitDto;
+import com.example.bankmicroserviceprototype.service.ExpenseOperationService;
 import com.example.bankmicroserviceprototype.service.LimitService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 @Tag(name = "Customer API", description = "Интерфейс для взаимодействия с клиентом")
@@ -21,6 +25,8 @@ import org.springframework.web.bind.annotation.*;
 public class CustomerController {
 
     final private LimitService limitService;
+
+    final private ExpenseOperationService operationService;
 
     @Operation(summary = "Эндпойнт для установки месячного лимита расходных операций",
             description = "По условиям ТЗ валюта лимита USD, дата устанавливается равной текущей, поэтому в эндпойнт мы принимаем только значения лимитов по категориям")
@@ -41,5 +47,10 @@ public class CustomerController {
         return new ResponseEntity<>(limitService.getActualLimit(accountFrom), HttpStatus.OK);
     }
 
+    @GetMapping("/report/{accountFrom}")
+    @Operation(summary = "Передача клиенту списка операций с флагом limit_exceeded =  true за текущий месяц")
+    public ResponseEntity<List<ExpenseOperation>> thisMonthExceeded(@PathVariable long accountFrom) {
+        return operationService.thisMonthExceeded(accountFrom);
+    }
 
 }

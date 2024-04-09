@@ -15,4 +15,9 @@ public interface ExpenseOperationRepository extends JpaRepository<ExpenseOperati
 
     List<ExpenseOperation> findByAccountFromAndExpenseCategoryAndDateTimeAfter(
             Long accountFrom, ExpenseCategory expenseCategory, ZonedDateTime dateTime);
+
+    List<ExpenseOperation> findByAccountFromAndDateTimeAfterAndLimitExceeded(
+            long accountFrom,
+            ZonedDateTime dateTime,
+            boolean limitExceeded);
 }

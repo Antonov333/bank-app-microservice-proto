@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +34,22 @@ public class ExchangeRateService {
 
     public ExchangeRateDataDto getDtoFromOpenExchangeRates() {
         String url = "https://openexchangerates.org/api/latest.json?app_id="
+                + apiId;
+        // Keep on mind it is possible to put particular currency codes like "&symbols=KZT,RUB"
+        // to narrow response
+        Mono<ExchangeRateDataDto> exchangeRateDataMono =
+                WebClient.create(url).get().retrieve().bodyToMono(ExchangeRateDataDto.class);
+        return exchangeRateDataMono.share().block();
+    }
+
+    public ExchangeRateDataDto getDtoFromOpenExchangeRatesHistorical(ZonedDateTime dateTime) {
+
+        // Need rates of today, so just retrieve latest
+        if (dateTime.toLocalDate().equals(LocalDate.now())) {
+            return getDtoFromOpenExchangeRates();
+        }
+
+        String url = "https://openexchangerates.org/api/historical/" + dateTime.toLocalDate().toString() + ".json?app_id="
                 + apiId;
         // Keep on mind it is possible to put particular currency codes like "&symbols=KZT,RUB"
         // to narrow response
@@ -73,5 +91,27 @@ public class ExchangeRateService {
 
     public List<ExchangeRate> getCurrencyRatesFromDataBase(String currencyCode) {
         return exchangeRateRepository.findByCurrencyCode(currencyCode);
+    }
+
+    /**
+     * Получаем курс валюты операции к USD на дату операции
+     * Сначала ищем по своей базе данных, если нужный курс отсутствует, обращаемся к внешнему сайту. Полученные данные сохраняем в базе.
+     *
+     * @param currencyCode трехбуквенное обозначение валюты
+     * @param dateTime     дата
+     * @return
+     */
+
+    public float retrieveExchangeRate(String currencyCode, ZonedDateTime dateTime) {
+        // Requesting database for required exchange rates
+        List<ExchangeRate> exchangeRates = exchangeRateRepository.findByCurrencyAndDateTime(
+                currencyCode, dateTime);
+        if (exchangeRates.isEmpty()) {
+            ExchangeRateDataDto exchangeRateDataDto = getDtoFromOpenExchangeRatesHistorical(dateTime);
+            saveExchangeRates(exchangeRateDataDto);
+            return exchangeRateDataDto.getRates().get(currencyCode);
+        }
+        exchangeRates = exchangeRates.stream().sorted(Comparator.comparing(ExchangeRate::getDateTime)).toList();
+        return exchangeRates.get(exchangeRates.size() - 1).getRate();
     }
 }
