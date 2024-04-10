@@ -1,9 +1,9 @@
 package com.example.bankmicroserviceprototype.mapper;
 
+import com.example.bankmicroserviceprototype.model.ExpenseLimit;
+import com.example.bankmicroserviceprototype.model.ExpenseLimitDto;
 import com.example.bankmicroserviceprototype.model.ExpenseOperation;
 import com.example.bankmicroserviceprototype.model.ExpenseOperationDto;
-import com.example.bankmicroserviceprototype.model.ExpenseOperationLimit;
-import com.example.bankmicroserviceprototype.model.ExpenseOperationLimitDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -23,6 +23,6 @@ public interface ModelMapper {
      */
     ExpenseOperation toEntity(ExpenseOperationDto expenseOperationDto);
 
-    ExpenseOperationLimit getLimitEntityFromDto(ExpenseOperationLimitDto expenseOperationLimitDto);
+    ExpenseLimit getLimitEntityFromDto(ExpenseLimitDto expenseLimitDto);
 
 }

@@ -2,8 +2,8 @@ package com.example.bankmicroserviceprototype.service;
 
 import com.example.bankmicroserviceprototype.mapper.ModelMapper;
 import com.example.bankmicroserviceprototype.model.ExpenseCategory;
-import com.example.bankmicroserviceprototype.model.ExpenseOperationLimit;
-import com.example.bankmicroserviceprototype.model.ExpenseOperationLimitDto;
+import com.example.bankmicroserviceprototype.model.ExpenseLimit;
+import com.example.bankmicroserviceprototype.model.ExpenseLimitDto;
 import com.example.bankmicroserviceprototype.repository.LimitRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,8 +19,8 @@ import java.util.List;
 public class LimitService {
     private final LimitRepository limitRepository;
 
-    static ExpenseOperationLimit getDefaultLimit() {
-        ExpenseOperationLimit limit = new ExpenseOperationLimit();
+    static ExpenseLimit getDefaultLimit() {
+        ExpenseLimit limit = new ExpenseLimit();
         limit.setTotalExpensesLimit(1000.00f);
         return limit;
     }
@@ -36,15 +36,15 @@ public class LimitService {
      * @return действующий лимит суммы расходных операций
      */
 
-    public ExpenseOperationLimit getActualLimit(long accountFrom) {
-        ExpenseOperationLimit actualLimit = getDefaultLimit();
+    public ExpenseLimit getActualLimit(long accountFrom) {
+        ExpenseLimit actualLimit = getDefaultLimit();
         actualLimit.setAccountFrom(accountFrom);
 
         // Look up database. If empty then apply default limit $1000 total,
         // else look through limit database and apply latest
         if (!limitRepository.findByAccountFrom(accountFrom).isEmpty()) {
-            List<ExpenseOperationLimit> limitList = limitRepository.findByAccountFrom(accountFrom)
-                    .stream().sorted(Comparator.comparing(ExpenseOperationLimit::getLimitSettingDateAndTime))
+            List<ExpenseLimit> limitList = limitRepository.findByAccountFrom(accountFrom)
+                    .stream().sorted(Comparator.comparing(ExpenseLimit::getLimitSettingDateAndTime))
                     .toList();
             actualLimit = limitList.get(limitList.size() - 1);
 
@@ -62,12 +62,12 @@ public class LimitService {
         return getActualLimit(accountFrom).getTotalExpensesLimit();
     }
 
-    public ResponseEntity<ExpenseOperationLimit> saveNewLimit(
+    public ResponseEntity<ExpenseLimit> saveNewLimit(
             Long accountFrom,
-            ExpenseOperationLimitDto expenseOperationLimitDto) {
+            ExpenseLimitDto expenseLimitDto) {
 
-        ExpenseOperationLimit expenseOperationLimit = ModelMapper.INSTANCE
-                .getLimitEntityFromDto(expenseOperationLimitDto);
+        ExpenseLimit expenseOperationLimit = ModelMapper.INSTANCE
+                .getLimitEntityFromDto(expenseLimitDto);
 
         expenseOperationLimit.setLimitSettingDateAndTime(ZonedDateTime.now());
         expenseOperationLimit.setAccountFrom(accountFrom);

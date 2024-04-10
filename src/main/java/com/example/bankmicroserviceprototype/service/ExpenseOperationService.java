@@ -37,6 +37,8 @@ public class ExpenseOperationService {
         // Сохраняем операцию в базе данных
         expenseOperation = expenseOperationRepository.save(expenseOperation);
 
+        // Получаем обменный курс валюты операции
+
         /* Определяем, превышен ли лимит расходов */
 
 

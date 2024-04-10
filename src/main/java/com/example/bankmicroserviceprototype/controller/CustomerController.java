@@ -1,8 +1,8 @@
 package com.example.bankmicroserviceprototype.controller;
 
+import com.example.bankmicroserviceprototype.model.ExpenseLimit;
+import com.example.bankmicroserviceprototype.model.ExpenseLimitDto;
 import com.example.bankmicroserviceprototype.model.ExpenseOperation;
-import com.example.bankmicroserviceprototype.model.ExpenseOperationLimit;
-import com.example.bankmicroserviceprototype.model.ExpenseOperationLimitDto;
 import com.example.bankmicroserviceprototype.service.ExpenseOperationService;
 import com.example.bankmicroserviceprototype.service.LimitService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,17 +33,17 @@ public class CustomerController {
     @PostMapping("/limit/{accountFrom}")
     @ApiResponses(value = {@ApiResponse(responseCode = "503", description = "Service is unavailable until construction completed"),
             @ApiResponse(responseCode = "201", description = "New expense operation limit stored in database")})
-    public ResponseEntity<ExpenseOperationLimit> setNewLimit(
+    public ResponseEntity<ExpenseLimit> setNewLimit(
             @PathVariable(name = "accountFrom") Long accountFrom,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
             description = "В метод эндпойнта необходимо передать DTO месячного лимита расходных операций",
-            content = @Content(schema = @Schema(implementation = ExpenseOperationLimitDto.class))) @RequestBody ExpenseOperationLimitDto expenseLimitDto) {
+                    content = @Content(schema = @Schema(implementation = ExpenseLimitDto.class))) @RequestBody ExpenseLimitDto expenseLimitDto) {
         return limitService.saveNewLimit(accountFrom, expenseLimitDto);
     }
 
     @GetMapping("/limit/{accountFrom}")
     @Operation(summary = "Передача клиенту значения текущего лимита")
-    public ResponseEntity<ExpenseOperationLimit> getActualLimit(@PathVariable(name = "accountFrom") Long accountFrom) {
+    public ResponseEntity<ExpenseLimit> getActualLimit(@PathVariable(name = "accountFrom") Long accountFrom) {
         return new ResponseEntity<>(limitService.getActualLimit(accountFrom), HttpStatus.OK);
     }
 

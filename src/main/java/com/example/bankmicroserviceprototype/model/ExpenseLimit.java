@@ -8,7 +8,7 @@ import java.time.ZonedDateTime;
 @Data
 @Entity
 @Table(name = "limits")
-public class ExpenseOperationLimit {
+public class ExpenseLimit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

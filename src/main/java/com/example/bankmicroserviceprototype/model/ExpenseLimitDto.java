@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Schema(description = "Дата установки лимита автоматически устанавливается текущая, валюта лимитов: USD")
-public class ExpenseOperationLimitDto {
+public class ExpenseLimitDto {
 
     @Schema(description = "Общий лимит. Игнорируется, если указаны все лимиты по категориям")
     private Float TotalExpensesLimit;

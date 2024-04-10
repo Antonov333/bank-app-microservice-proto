@@ -53,5 +53,26 @@ public class ExpenseOperation {
     @Column(name = "operation_time")
     private ZonedDateTime dateTime;
 
+    /**
+     * Флаг превышения лимита расходов
+     */
     private boolean limitExceeded;
+
+    /**
+     * Идентификатор сущности курса валюты, по которому вычисляется эквивалентная сумма в USD.
+     */
+    @Column(name = "exchange_rate_id")
+    private long exchangeRateId;
+
+    /**
+     * Долларовый эквивалент суммы операции
+     */
+    @Column(name = "sum_usd")
+    private float equivalentUsdSum;
+
+    /**
+     * Идентификатор лимита расходов, который применяется к операции
+     */
+    @Column(name = "limit_id")
+    private long expenselimitId;
 }
