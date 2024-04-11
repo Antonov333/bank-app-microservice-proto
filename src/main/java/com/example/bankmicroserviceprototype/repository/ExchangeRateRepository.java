@@ -14,6 +14,6 @@ public interface ExchangeRateRepository extends JpaRepository<ExchangeRate, Long
     List<ExchangeRate> findByCurrencyCode(String currencyCode);
 
     @Query(nativeQuery = true,
-            value = "SELECT * FROM exchange_rates e WHERE currency_code=?1 and date_time LIKE % ?2")
+            value = "SELECT * FROM exchange_rates e WHERE e.currency_code=?1 and e.date_time =?2")
     List<ExchangeRate> findByCurrencyAndDateTime(String currencyCode, ZonedDateTime dateTime);
 }

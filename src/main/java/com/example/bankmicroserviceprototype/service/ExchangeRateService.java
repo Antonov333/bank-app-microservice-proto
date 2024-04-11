@@ -99,7 +99,7 @@ public class ExchangeRateService {
      *
      * @param currencyCode трехбуквенное обозначение валюты
      * @param dateTime     дата
-     * @return
+     * @return сущность обменного курса
      */
 
     public ExchangeRate retrieveExchangeRate(String currencyCode, ZonedDateTime dateTime) {
@@ -111,6 +111,12 @@ public class ExchangeRateService {
             saveExchangeRates(exchangeRateDataDto);
         }
         exchangeRates = exchangeRates.stream().sorted(Comparator.comparing(ExchangeRate::getDateTime)).toList();
-        return exchangeRates.get(exchangeRates.size() - 1);
+        ExchangeRate wrongRate = new ExchangeRate();
+        wrongRate.setDateTime(ZonedDateTime.now());
+        wrongRate.setCurrencyCode(currencyCode);
+        wrongRate.setBase("USD");
+        wrongRate.setRate(1.0f);
+        wrongRate.setId(0L);
+        return wrongRate /*exchangeRates.get(exchangeRates.size() - 1*/;
     }
 }

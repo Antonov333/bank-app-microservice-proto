@@ -16,7 +16,7 @@ public class ExchangeRate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "date_time")
+    @Column(name = "date_time", columnDefinition = "TIME WITH TIME ZONE")
     private ZonedDateTime dateTime;
 
     @Column(name = "currency_code")

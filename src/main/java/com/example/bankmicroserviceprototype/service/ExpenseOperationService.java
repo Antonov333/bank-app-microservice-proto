@@ -2,6 +2,7 @@ package com.example.bankmicroserviceprototype.service;
 
 import com.example.bankmicroserviceprototype.mapper.ModelMapper;
 import com.example.bankmicroserviceprototype.model.ExchangeRate;
+import com.example.bankmicroserviceprototype.model.ExpenseLimit;
 import com.example.bankmicroserviceprototype.model.ExpenseOperation;
 import com.example.bankmicroserviceprototype.model.ExpenseOperationDto;
 import com.example.bankmicroserviceprototype.repository.ExpenseOperationRepository;
@@ -29,12 +30,12 @@ public class ExpenseOperationService {
      * часть подтягивается через сервисы лимита расходов (expenseLimitId) и обменных курсов(exchangeRateId), поле эквивалентной долларовой суммы
      * вычисляется на основе полученных данных
      *
-     * @param expenseOperationDto
-     * @return
+     * @param expenseOperationDto Данные расходной операции
+     * @return код результата выполнения метода
      */
     public ResponseEntity<HttpStatus> saveExpenseOperation(ExpenseOperationDto expenseOperationDto) {
 
-        logger.info("Received Expense Op Dto: " + expenseOperationDto);
+        logger.info("Received Expense Operation DTO: " + expenseOperationDto);
 
         ExpenseOperation expenseOperation = ModelMapper.INSTANCE.toEntity(expenseOperationDto);
         logger.info("Converted to entity: " + expenseOperation);
@@ -54,47 +55,47 @@ public class ExpenseOperationService {
         expenseOperation.setEquivalentUsdSum(expenseOperation.getSum() / exchangeRate.getRate());
 
         /* Определяем, превышен ли лимит расходов */
-        float sumThisMonth;
+
         ZonedDateTime operationDateTime = expenseOperation.getDateTime();
         ZonedDateTime beginningOfThisMonth = beginningOfMonth(operationDateTime);
 
-        List<ExpenseOperation> operationsThisMonth;
-
         // Получаем операции по аккаунту с начала месяца c учетом категорий текущего лимита
-        if (limitsDefinedForAllCategories(expenseOperation.getAccountFrom())) {
+        // Сначала нужно определить, лимит определен по категориям операций,
+        // либо на общую сумму расходов, чтобы получить соответствующую выборку операций из БД
+        ExpenseLimit expenseLimit = limitService.getActualLimit(expenseOperation.getAccountFrom());
+        expenseOperation.setExpenselimitId(expenseLimit.getId());
+        if (limitService.limitsDefinedForAllCategories(expenseLimit)) {
+            float sumThisMonthOfGivenCategory;
+            List<ExpenseOperation> operationsThisMonthOfGivenCategory;
             // заданы лимиты по категориям расходов, поэтому ищем операции соответствующей категории,
             // совершенные с начала месяца
-            operationsThisMonth = expenseOperationRepository
+            operationsThisMonthOfGivenCategory = expenseOperationRepository
                     .findByAccountFromAndExpenseCategoryAndDateTimeAfter(
                     expenseOperation.getAccountFrom(),
                     expenseOperation.getExpenseCategory(),
                     beginningOfThisMonth);
 
             // Считаем сумму
-            sumThisMonth = estimateTotalSumOfOperationsInUsd(operationsThisMonth);
+            sumThisMonthOfGivenCategory = calculateTotalSumOfOperationsInUsd(operationsThisMonthOfGivenCategory);
 
             // сравниваем сумму с лимитом и устанавливаем значение флага
             expenseOperation.setLimitExceeded(
-                    sumThisMonth >
-                            limitService.getActualLimitByCategory(
-                                    expenseOperation.getAccountFrom(),
-                                    expenseOperation.getExpenseCategory()));
+                    sumThisMonthOfGivenCategory >
+                            limitService.getCategoryLimitValue(expenseLimit, expenseOperation.getExpenseCategory()));
 
         } else {
             //Не определен лимит по товарам и/или услугам, поэтому применяем лимит на общую сумму расходов
             // и получаем сумму по всем операциям за период
-            operationsThisMonth = expenseOperationRepository.findByAccountFromAndDateTimeAfter(
+            List<ExpenseOperation> operationsThisMonthOfCategory = expenseOperationRepository.findByAccountFromAndDateTimeAfter(
                     expenseOperation.getAccountFrom(),
                     beginningOfThisMonth);
             // Считаем сумму
 
-            sumThisMonth = estimateTotalSumOfOperationsInUsd(operationsThisMonth);
-
+            float sumThisMonth = calculateTotalSumOfOperationsInUsd(operationsThisMonthOfCategory);
 
             // сравниваем сумму с лимитом
             expenseOperation.setLimitExceeded(
-                    sumThisMonth >
-                            limitService.getActualLimit(expenseOperation.getAccountFrom()).getTotalExpensesLimit());
+                    sumThisMonth > expenseLimit.getTotalExpensesLimit());
         }
 
         // сохраняем сущность расходной операции с вычисленным значением флага превышения лимита
@@ -114,7 +115,7 @@ public class ExpenseOperationService {
                 dateTime.getDayOfMonth(), 0, 0, 0, 0, dateTime.getZone());
     }
 
-    float estimateTotalSumOfOperationsInUsd(List<ExpenseOperation> operationList) {
+    float calculateTotalSumOfOperationsInUsd(List<ExpenseOperation> operationList) {
         float sum = 0.0f;
         float exchangeRate;
         for (ExpenseOperation o : operationList) {
@@ -124,14 +125,6 @@ public class ExpenseOperationService {
 
         //TODO: complete logic!!
 
-    }
-
-    boolean limitsDefinedForAllCategories(Long accountFrom) {
-        return
-                (limitService.getActualLimit(accountFrom).getServiceExpensesLimit() != null)
-                        &
-                        (limitService.getActualLimit(accountFrom).getServiceExpensesLimit() != null)
-                ;
     }
 
     public ResponseEntity<List<ExpenseOperation>> thisMonthExceeded(long accountFrom) {

@@ -50,7 +50,7 @@ public class ExpenseOperation {
     /**
      * Дата и время операции
      */
-    @Column(name = "operation_time")
+    @Column(name = "operation_time", columnDefinition = "TIME WITH TIME ZONE")
     private ZonedDateTime dateTime;
 
     /**

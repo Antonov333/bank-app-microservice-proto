@@ -14,3 +14,11 @@ ALTER table exchange_rates ADD base VARCHAR;
 -- changeset antonov:6
 ALTER table exchange_rates DROP COLUMN currency_code;
 ALTER table exchange_rates ADD currency_code VARCHAR;
+
+--changeset antonov:10
+ALTER table exchange_rates DROP COLUMN date_time;
+ALTER table exchange_rates ADD date_time TIMESTAMP(0);
+
+--changeset antonov:12
+ALTER table exchange_rates DROP COLUMN date_time;
+ALTER table exchange_rates ADD date_time TIMESTAMP WITH TIME ZONE;

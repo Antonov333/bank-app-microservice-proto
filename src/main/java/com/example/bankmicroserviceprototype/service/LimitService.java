@@ -33,14 +33,12 @@ public class LimitService {
     /**
      * Метод проверяет наличие лимитов в базе данных и при отсутствии записей в таблице лимитов возвращает лимит по умолчанию.
      * При наличии записей возвращается последний установленный лимит.
-     *
-     * @return действующий лимит суммы расходных операций
+     * @param accountFrom банковский счет клиента
+     * @return сущность действующего лимита расходных операций
      */
-
     public ExpenseLimit getActualLimit(long accountFrom) {
         ExpenseLimit actualLimit = getDefaultLimit();
         actualLimit.setAccountFrom(accountFrom);
-
         // Look up database. If empty then apply default limit $1000 total,
         // else look through limit database and apply latest
         if (!limitRepository.findByAccountFrom(accountFrom).isEmpty()) {
@@ -48,7 +46,6 @@ public class LimitService {
                     .stream().sorted(Comparator.comparing(ExpenseLimit::getLimitSettingDateAndTime))
                     .toList();
             actualLimit = limitList.get(limitList.size() - 1);
-
         }
         return actualLimit;
     }
@@ -76,5 +73,26 @@ public class LimitService {
         expenseOperationLimit = limitRepository.save(expenseOperationLimit);
 
         return new ResponseEntity<>(expenseOperationLimit, HttpStatus.CREATED);
+    }
+
+    public float getCategoryLimitValue(ExpenseLimit expenseLimit, ExpenseCategory expenseCategory) {
+        if (!limitsDefinedForAllCategories(expenseLimit)) {
+            return 0.0F;
+        }
+        switch (expenseCategory) {
+            case SERVICE:
+                return expenseLimit.getProductsExpensesLimit();
+            case PRODUCT:
+                return expenseLimit.getServiceExpensesLimit();
+        }
+        return 0.0F;
+    }
+
+    public boolean limitsDefinedForAllCategories(ExpenseLimit expenseLimit) {
+        if (expenseLimit == null) {
+            return false;
+        }
+        return (expenseLimit.getServiceExpensesLimit() != null) &
+                (expenseLimit.getProductsExpensesLimit() != null);
     }
 }

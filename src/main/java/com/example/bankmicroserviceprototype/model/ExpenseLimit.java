@@ -23,7 +23,7 @@ public class ExpenseLimit {
     @Column(name = "services")
     private Float serviceExpensesLimit;
 
-    @Column(name = "date_and_time")
+    @Column(name = "date_and_time", columnDefinition = "TIME WITH TIME ZONE")
     private ZonedDateTime limitSettingDateAndTime;
 
     @Column(name = "account_from")

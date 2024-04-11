@@ -13,3 +13,11 @@ CREATE table operations (
 ALTER TABLE operations ADD sum_usd FLOAT;
 ALTER TABLE operations ADD exchange_rate_id INT8;
 ALTER TABLE operations ADD limit_id INT8;
+
+--changeset antonov:9
+ALTER TABLE operations DROP COLUMN operation_time;
+ALTER TABLE operations ADD operation_time TIMESTAMP(0);
+
+--changeset antonov:14
+ALTER TABLE operations DROP COLUMN operation_time;
+ALTER TABLE operations ADD operation_time TIMESTAMP WITH TIME ZONE;
