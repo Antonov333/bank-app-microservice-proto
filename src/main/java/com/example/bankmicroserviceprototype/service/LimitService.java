@@ -22,6 +22,7 @@ public class LimitService {
     static ExpenseLimit getDefaultLimit() {
         ExpenseLimit limit = new ExpenseLimit();
         limit.setTotalExpensesLimit(1000.00f);
+        limit.setId(0L);
         return limit;
     }
 

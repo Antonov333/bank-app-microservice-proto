@@ -102,16 +102,15 @@ public class ExchangeRateService {
      * @return
      */
 
-    public float retrieveExchangeRate(String currencyCode, ZonedDateTime dateTime) {
+    public ExchangeRate retrieveExchangeRate(String currencyCode, ZonedDateTime dateTime) {
         // Requesting database for required exchange rates
         List<ExchangeRate> exchangeRates = exchangeRateRepository.findByCurrencyAndDateTime(
                 currencyCode, dateTime);
         if (exchangeRates.isEmpty()) {
             ExchangeRateDataDto exchangeRateDataDto = getDtoFromOpenExchangeRatesHistorical(dateTime);
             saveExchangeRates(exchangeRateDataDto);
-            return exchangeRateDataDto.getRates().get(currencyCode);
         }
         exchangeRates = exchangeRates.stream().sorted(Comparator.comparing(ExchangeRate::getDateTime)).toList();
-        return exchangeRates.get(exchangeRates.size() - 1).getRate();
+        return exchangeRates.get(exchangeRates.size() - 1);
     }
 }

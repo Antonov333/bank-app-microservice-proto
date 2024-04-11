@@ -1,6 +1,7 @@
 package com.example.bankmicroserviceprototype.service;
 
 import com.example.bankmicroserviceprototype.mapper.ModelMapper;
+import com.example.bankmicroserviceprototype.model.ExchangeRate;
 import com.example.bankmicroserviceprototype.model.ExpenseOperation;
 import com.example.bankmicroserviceprototype.model.ExpenseOperationDto;
 import com.example.bankmicroserviceprototype.repository.ExpenseOperationRepository;
@@ -19,14 +20,18 @@ import java.util.List;
 public class ExpenseOperationService {
 
     private final ExpenseOperationRepository expenseOperationRepository;
-
     private final LimitService limitService;
-
     private final ExchangeRateService exchangeRateService;
-
     private final Logger logger = LoggerFactory.getLogger("ExpenseOperationService Logger");
 
-
+    /**
+     * Метод создает и сохраняет сущность расходной операции. Часть полей заполняется данными из DTO,
+     * часть подтягивается через сервисы лимита расходов (expenseLimitId) и обменных курсов(exchangeRateId), поле эквивалентной долларовой суммы
+     * вычисляется на основе полученных данных
+     *
+     * @param expenseOperationDto
+     * @return
+     */
     public ResponseEntity<HttpStatus> saveExpenseOperation(ExpenseOperationDto expenseOperationDto) {
 
         logger.info("Received Expense Op Dto: " + expenseOperationDto);
@@ -38,10 +43,17 @@ public class ExpenseOperationService {
         expenseOperation = expenseOperationRepository.save(expenseOperation);
 
         // Получаем обменный курс валюты операции
+        ExchangeRate exchangeRate = exchangeRateService.retrieveExchangeRate(
+                expenseOperation.getCurrencyCode(),
+                expenseOperation.getDateTime());
+
+        // Сохраняем идентификатор сущности обменного курса в поле exchangeRateId
+        expenseOperation.setExchangeRateId(exchangeRate.getId());
+
+        // Вычисляем сумму в долларах, эквивалентную сумме операции
+        expenseOperation.setEquivalentUsdSum(expenseOperation.getSum() / exchangeRate.getRate());
 
         /* Определяем, превышен ли лимит расходов */
-
-
         float sumThisMonth;
         ZonedDateTime operationDateTime = expenseOperation.getDateTime();
         ZonedDateTime beginningOfThisMonth = beginningOfMonth(operationDateTime);
@@ -94,7 +106,7 @@ public class ExpenseOperationService {
 
     /**
      * @param dateTime some date and time
-     * @return date and of 00:00:00 the first day of month specified by argument
+     * @return date and time of 00:00:00 of the first day of month specified by argument
      */
     ZonedDateTime beginningOfMonth(ZonedDateTime dateTime) {
         return ZonedDateTime.of(dateTime.getYear(),
@@ -106,9 +118,7 @@ public class ExpenseOperationService {
         float sum = 0.0f;
         float exchangeRate;
         for (ExpenseOperation o : operationList) {
-            exchangeRate = exchangeRateService.retrieveExchangeRate(o.getCurrencyCode(),
-                    o.getDateTime());
-            sum += o.getSum();
+            sum += o.getEquivalentUsdSum();
         }
         return sum;
 
